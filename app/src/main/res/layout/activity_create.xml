@@ -7,7 +7,7 @@
     tools:context=".CreateActivity">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/ivPhoto"
         android:layout_width="338dp"
         android:layout_height="273dp"
         android:layout_marginEnd="8dp"
@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/ivPhoto" />
 
     <Button
         android:id="@+id/btPost"

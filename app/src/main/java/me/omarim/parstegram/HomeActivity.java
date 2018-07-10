@@ -103,9 +103,9 @@ public class HomeActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK && requestCode == FROM_CAMERA_REQUEST_CODE) {
             // TODO: get image from the intent
-//            Bundle extras = data.getExtras();
-//            Uri imageBitmap = (Bitmap) extras.get("data");
+            Bundle extras = data.getExtras();
             Intent i = new Intent(this, CreateActivity.class);
+            i.putExtra("photoPath", mCurrentPhotoPath);
             startActivity(i);
         }
     }

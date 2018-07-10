@@ -1,12 +1,16 @@
 package me.omarim.parstegram;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -21,7 +25,9 @@ public class CreateActivity extends AppCompatActivity {
 
 
     EditText etDescription;
+    ImageView ivPhoto;
     Button btPost;
+    String photoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +35,27 @@ public class CreateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create);
 
         etDescription = findViewById(R.id.etDescription);
+        ivPhoto = findViewById(R.id.ivPhoto);
         btPost = findViewById(R.id.btPost);
+
+        Bundle extras = getIntent().getExtras();
+        photoPath = (String) extras.get("photoPath");
+        final Bitmap takenImage = BitmapFactory.decodeFile(photoPath);
+        ImageView ivPhoto = findViewById(R.id.ivPhoto);
+        ivPhoto.setImageBitmap(takenImage);
 
         btPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+                //TODO:  RESIZE BITMAP
+
                 final String description = etDescription.getText().toString();
                 final ParseUser user = ParseUser.getCurrentUser();
+
+                final File file = new File(photoPath);
+                final ParseFile parseFile = new ParseFile(file);
 //
 //                // TODO: get an image from the camera or upload it from photos
 //
@@ -47,7 +67,7 @@ public class CreateActivity extends AppCompatActivity {
 //                    }
 //                });
 
-                createSimplePost(description, user);
+                createPost(description, parseFile ,user);
 
                 Intent i = new Intent(CreateActivity.this, HomeActivity.class);
                 startActivity(i);
