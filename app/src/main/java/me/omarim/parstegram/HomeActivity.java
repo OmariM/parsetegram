@@ -88,12 +88,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private void loadTopPosts() {
         final Post.Query postQuery = new Post.Query();
-        postQuery.getTop().withUser();
+        postQuery.getTop().withUser().recentFirst();
         postQuery.findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    for (int i = objects.size() - 1; i >= 0; i--) {
+                    for (int i = 0; i < objects.size(); i++) {
                         posts.add(objects.get(i));
                         postAdapter.notifyItemInserted(posts.size() - 1);
                     }
