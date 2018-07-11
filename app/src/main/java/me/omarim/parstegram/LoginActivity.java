@@ -14,6 +14,8 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
+import java.io.File;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameInput;
@@ -46,6 +48,13 @@ public class LoginActivity extends AppCompatActivity {
         //show the sign up stuff
         loginButton.setVisibility(View.VISIBLE);
         signupButton.setVisibility(View.VISIBLE);
+
+        //persistence
+        if (ParseUser.getCurrentUser() != null) {
+            final Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(i);
+            finish();
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
