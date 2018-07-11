@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,8 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
+import org.json.JSONArray;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -34,7 +37,6 @@ import me.omarim.parstegram.models.Post;
 
 public class HomeActivity extends AppCompatActivity {
 
-    Button btRefresh;
     Button btCreate;
     Button btLogout;
 
@@ -45,17 +47,19 @@ public class HomeActivity extends AppCompatActivity {
     private PostAdapter postAdapter;
     ArrayList<Post> posts;
     RecyclerView rvPosts;
+    private SwipeRefreshLayout swipeContainer;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-        btRefresh = findViewById(R.id.btRefresh);
         btCreate = findViewById(R.id.btCreate);
         btLogout = findViewById(R.id.btLogout);
         rvPosts = findViewById(R.id.rvPosts);
+        swipeContainer = findViewById(R.id.swipeContainer);
+
 
 
         // instantiate the data source
@@ -78,16 +82,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        btRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postAdapter.clear();
-                loadTopPosts();
-            }
-        });
-
-
-
         btLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +91,20 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                postAdapter.clear();
+                loadTopPosts();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
 
     }
 
@@ -113,6 +121,7 @@ public class HomeActivity extends AppCompatActivity {
                         posts.add(objects.get(i));
                         postAdapter.notifyItemInserted(posts.size() - 1);
                     }
+                    swipeContainer.setRefreshing(false);
                 } else {
                     e.printStackTrace();
                 }
@@ -180,5 +189,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     }
+
 
 }

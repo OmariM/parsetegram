@@ -44,4 +44,5 @@ dependencies {
     implementation 'com.parse:parseui-widget-android:0.0.2'
     // for persistence
     implementation "commons-io:commons-io:2.6"
+
 }
