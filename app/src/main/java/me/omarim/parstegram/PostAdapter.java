@@ -1,7 +1,6 @@
 package me.omarim.parstegram;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -13,16 +12,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 
 import java.util.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.omarim.parstegram.models.Post;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
@@ -110,7 +104,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             ivPostImage = itemView.findViewById(R.id.ivPostImage);
             tvBody = itemView.findViewById(R.id.tvBody);
-            tvHandle = itemView.findViewById(R.id.tvHandle);
+            tvHandle = itemView.findViewById(R.id.etHandle);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
 
             // add this as the item view listener
