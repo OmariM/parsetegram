@@ -6,13 +6,13 @@
     <uses-permission android:name="android.premission.WRITE_EXTENRAL_STORAGE" />
     <uses-permission android:name="android.premission.READ_EXTENRAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
-
     <uses-feature android:name="android.hardware.camera" />
 
     <application
@@ -45,7 +45,8 @@
                 android:resource="@xml/fileprovider" />
         </provider>
 
-        <activity android:name=".CreateActivity"></activity>
+        <activity android:name=".CreateActivity" />
+        <activity android:name=".DetailActivity"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package me.omarim.parstegram;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -13,6 +14,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+
+import org.parceler.Parcels;
 
 import java.util.Date;
 import java.util.List;
@@ -47,7 +50,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         viewHolder.tvBody.setText(post.getDescription());
         viewHolder.tvHandle.setText(post.getUser().get("handle").toString());
         Glide.with(context).load(post.getImage().getUrl()).into(viewHolder.ivPostImage);
-        // TODO: timestamp stuff
         String timestamp = getRelativeTimeAgo(post.getCreatedAt());
         viewHolder.tvTimestamp.setText(timestamp);
     }
@@ -96,9 +98,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             if(position != RecyclerView.NO_POSITION) {
                 Post post = posts.get(position);
                 //TODO: make the detailed post view intent
-//                Intent i = new Intent(context, DetailActivity.class);
-//                i.putExtra("post", Parcels.wrap(post));
-//                context.startActivity(i);
+                Intent i = new Intent(context, DetailActivity.class);
+                i.putExtra("post", post);
+                context.startActivity(i);
                 Toast.makeText(context, "Haven't made the detailed view yet", Toast.LENGTH_SHORT).show();
             }
         }
