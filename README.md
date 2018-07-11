@@ -1,8 +1,8 @@
-# Project 3 - *Name of App Here*
+# Project 3 - *Parstegram*
 
-**Name of your app** is a photo sharing app using Parse as its backend.
+**Parstegram** is a photo sharing app using Parse as its backend.
 
-Time spent: **X** hours spent in total
+Time spent: **10** hours spent in total
 
 ## User Stories
 
@@ -64,8 +64,8 @@ Describe any challenges encountered while building the app.
 
 ## License
 
-    Copyright [yyyy] [name of copyright owner]
-
+    Copyright 2018 Omari Matthews
+    
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
