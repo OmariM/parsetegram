@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseUser;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class HomeActivity extends AppCompatActivity {
 
     Button btRefresh;
     Button btCreate;
+    Button btLogout;
 
     public final static int FROM_CAMERA_REQUEST_CODE = 1;
     public final static int BACK_TO_TIMELINE = 2;
@@ -52,7 +54,9 @@ public class HomeActivity extends AppCompatActivity {
 
         btRefresh = findViewById(R.id.btRefresh);
         btCreate = findViewById(R.id.btCreate);
+        btLogout = findViewById(R.id.btLogout);
         rvPosts = findViewById(R.id.rvPosts);
+
 
         // instantiate the data source
         posts = new ArrayList<>();
@@ -79,6 +83,18 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 postAdapter.clear();
                 loadTopPosts();
+            }
+        });
+
+
+
+        btLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ParseUser.logOut();
+                Intent i = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(i);
+                finish();
             }
         });
 
