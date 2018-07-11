@@ -56,21 +56,11 @@ public class CreateActivity extends AppCompatActivity {
 
                 final File file = new File(photoPath);
                 final ParseFile parseFile = new ParseFile(file);
-//
-//                // TODO: get an image from the camera or upload it from photos
-//
-//                parseFile.saveInBackground(new SaveCallback() {
-//                    @Override
-//                    public void done(ParseException e) {
-//                        Log.i("Home Activity", "image save success!");
-//                        createPost(description, parseFile, user);
-//                    }
-//                });
 
                 createPost(description, parseFile ,user);
 
                 Intent i = new Intent(CreateActivity.this, HomeActivity.class);
-                startActivity(i);
+                startActivityForResult(i, HomeActivity.BACK_TO_TIMELINE);
             }
         });
     }

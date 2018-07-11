@@ -49,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
                     // probably go to another intent
                     final Intent i = new Intent(LoginActivity.this, HomeActivity.class);
                     startActivity(i);
-
                     finish();
                 }
                 else {

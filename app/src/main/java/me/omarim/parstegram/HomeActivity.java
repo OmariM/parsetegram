@@ -1,37 +1,31 @@
 package me.omarim.parstegram;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -46,16 +40,30 @@ public class HomeActivity extends AppCompatActivity {
     public final static int BACK_TO_TIMELINE = 2;
     String mCurrentPhotoPath;
 
+    private PostAdapter postAdapter;
+    ArrayList<Post> posts;
+    RecyclerView rvPosts;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        loadTopPosts();
-
         btRefresh = findViewById(R.id.btRefresh);
         btCreate = findViewById(R.id.btCreate);
+        rvPosts = findViewById(R.id.rvPosts);
+
+        // instantiate the data source
+        posts = new ArrayList<>();
+        // construct the adapter
+        postAdapter = new PostAdapter(posts);
+        // recycler view set up (layout manager, use andapter)
+        rvPosts.setLayoutManager(new LinearLayoutManager(this));
+        // set the adapter
+        rvPosts.setAdapter(postAdapter);
+        // populate the recycler view
+        loadTopPosts();
 
         btCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +77,7 @@ public class HomeActivity extends AppCompatActivity {
         btRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                postAdapter.clear();
                 loadTopPosts();
             }
         });
@@ -78,17 +87,16 @@ public class HomeActivity extends AppCompatActivity {
 
 
     private void loadTopPosts() {
-
         final Post.Query postQuery = new Post.Query();
         postQuery.getTop().withUser();
-
         postQuery.findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    for (int i = 0; i < objects.size(); i++) Log.d("Home Activity", "Post[" + i + "] = "
-                            + objects.get(i).getDescription()
-                            + "\nusername = " + objects.get(i).getUser().getUsername());
+                    for (int i = objects.size() - 1; i >= 0; i--) {
+                        posts.add(objects.get(i));
+                        postAdapter.notifyItemInserted(posts.size() - 1);
+                    }
                 } else {
                     e.printStackTrace();
                 }
@@ -102,21 +110,16 @@ public class HomeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK && requestCode == FROM_CAMERA_REQUEST_CODE) {
-            // TODO: get image from the intent
-            Bundle extras = data.getExtras();
             Intent i = new Intent(this, CreateActivity.class);
             i.putExtra("photoPath", mCurrentPhotoPath);
             startActivity(i);
         }
-    }
 
-    public String dateToString(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
-
-        //to convert Date to String, use format method of SimpleDateFormat class.
-        String strDate = dateFormat.format(date);
-
-        return strDate;
+        if (resultCode == RESULT_OK && requestCode == BACK_TO_TIMELINE) {
+            Toast.makeText(this, "Back to time line received", Toast.LENGTH_LONG).show();
+            postAdapter.clear();
+            loadTopPosts();
+        }
     }
 
 
@@ -137,6 +140,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void dispatchTakePictureIntent() {
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.CAMERA ) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Make sure you have permissions enabled!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
