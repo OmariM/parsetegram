@@ -42,4 +42,6 @@ dependencies {
     implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     // glide w/ parse
     implementation 'com.parse:parseui-widget-android:0.0.2'
+    // time shit joda-time
+    compile 'joda-time:joda-time:2.10'
 }

@@ -15,6 +15,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+
+import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -52,7 +54,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         viewHolder.tvHandle.setText(post.getUser().get("handle").toString());
         Glide.with(context).load(post.getImage().getUrl()).into(viewHolder.ivPostImage);
         // TODO: timestamp stuff
-//        viewHolder.tvTimestamp.setText(getRelativeTimeAgo(post.createdAt));
+        String timestamp = getRelativeTimeAgo(post.getCreatedAt());
+        viewHolder.tvTimestamp.setText(timestamp);
     }
 
     @Override
@@ -61,23 +64,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     //TODO: fix this
-//    // getRelativeTimeAgo("Mon Apr 01 21:16:23 +0000 2014");
-//    public String getRelativeTimeAgo(String rawJsonDate) {
-//        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
-//        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
-//        sf.setLenient(true);
-//
-//        String relativeDate = "";
-//        try {
-//            long dateMillis = sf.parse(rawJsonDate).getTime();
-//            relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis,
-//                    System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return relativeDate;
-//    }
+    // getRelativeTimeAgo("Mon Apr 01 21:16:23 +0000 2014");
+    public String getRelativeTimeAgo(Date parseDate) {
+
+        String relativeDate;
+        long dateMillis = parseDate.getTime();
+        relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
+
+        return relativeDate;
+    }
 
     public void clear() {
         posts.clear();;
