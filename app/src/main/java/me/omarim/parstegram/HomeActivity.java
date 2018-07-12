@@ -1,5 +1,9 @@
 package me.omarim.parstegram;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -7,12 +11,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,7 +39,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
+import java.util.concurrent.Executors;
 
+import me.omarim.parstegram.models.ParseDataSourceFactory;
 import me.omarim.parstegram.models.Post;
 
 public class HomeActivity extends AppCompatActivity {
@@ -45,7 +54,7 @@ public class HomeActivity extends AppCompatActivity {
     String mCurrentPhotoPath;
 
     private PostAdapter postAdapter;
-    ArrayList<Post> posts;
+    LiveData<PagedList<Post>> posts;
     RecyclerView rvPosts;
     private SwipeRefreshLayout swipeContainer;
 
@@ -63,9 +72,40 @@ public class HomeActivity extends AppCompatActivity {
 
 
         // instantiate the data source
-        posts = new ArrayList<>();
-        // construct the adapter
-        postAdapter = new PostAdapter(posts);
+//        posts = new ArrayList<>();
+//        // construct the adapter
+
+
+        PagedList.Config pagedListConfig =
+                new PagedList.Config.Builder().setEnablePlaceholders(true)
+                        .setPrefetchDistance(10)
+                        .setInitialLoadSizeHint(10)
+                        .setPageSize(10).build();
+
+        postAdapter = new PostAdapter(new DiffUtil.ItemCallback<Post>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Post post, @NonNull Post t1) {
+                return post.getObjectId() == t1.getObjectId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Post post, @NonNull Post t1) {
+                return post.getUpdatedAt() == t1.getUpdatedAt();
+            }
+        }, this);
+
+
+        ParseDataSourceFactory sourceFactory = new ParseDataSourceFactory();
+
+        posts = new LivePagedListBuilder(sourceFactory, pagedListConfig).build();
+
+        posts.observe(this, new Observer<PagedList<Post>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Post> posts) {
+                postAdapter.submitList(posts);
+            }
+        });
+
         // recycler view set up (layout manager, use andapter)
         rvPosts.setLayoutManager(new LinearLayoutManager(this));
         // set the adapter
@@ -95,7 +135,6 @@ public class HomeActivity extends AppCompatActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                postAdapter.clear();
                 loadTopPosts();
             }
         });
@@ -117,10 +156,6 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    for (int i = 0; i < objects.size(); i++) {
-                        posts.add(objects.get(i));
-                        postAdapter.notifyItemInserted(posts.size() - 1);
-                    }
                     swipeContainer.setRefreshing(false);
                 } else {
                     e.printStackTrace();
@@ -142,7 +177,7 @@ public class HomeActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK && requestCode == BACK_TO_TIMELINE) {
             Toast.makeText(this, "Back to time line received", Toast.LENGTH_LONG).show();
-            postAdapter.clear();
+//            postAdapter.clear();
             loadTopPosts();
         }
     }

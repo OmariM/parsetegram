@@ -1,8 +1,11 @@
 package me.omarim.parstegram;
 
+import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -22,15 +25,20 @@ import java.util.List;
 
 import me.omarim.parstegram.models.Post;
 
-public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
+public class PostAdapter extends PagedListAdapter<Post, PostAdapter.ViewHolder> {
 
-    List<Post> posts;
     Context context;
 
     // pass in the tweets array from the constructor
-    public PostAdapter(List<Post> posts) {
-        this.posts = posts;
+//    public PostAdapter(List<Post> posts) {
+//        this.posts = posts;
+//    }
+
+    public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, Context context) {
+        super(diffCallback);
+        this.context = context;
     }
+
 
     // for each row inflate the layout and cache them into a viewholder
 
@@ -46,17 +54,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        Post post = posts.get(i);
+        Post post = getItem(i);
         viewHolder.tvBody.setText(post.getDescription());
-        viewHolder.tvHandle.setText(post.getUser().get("handle").toString());
+//        viewHolder.tvHandle.setText(post.getUser().get("handle").toString());
         Glide.with(context).load(post.getImage().getUrl()).into(viewHolder.ivPostImage);
         String timestamp = getRelativeTimeAgo(post.getCreatedAt());
         viewHolder.tvTimestamp.setText(timestamp);
-    }
-
-    @Override
-    public int getItemCount() {
-        return posts.size();
     }
 
     //TODO: fix this
@@ -68,17 +71,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
 
         return relativeDate;
-    }
-
-    public void clear() {
-        posts.clear();;
-        notifyDataSetChanged();
-    }
-
-    // Add a list of items -- change to type used
-    public void addAll(List<Post> list) {
-        posts.addAll(list);
-        notifyDataSetChanged();
     }
 
 
@@ -96,7 +88,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             int position = getAdapterPosition();
             // ensure position validity
             if(position != RecyclerView.NO_POSITION) {
-                Post post = posts.get(position);
+                Post post = getItem(position);
                 //TODO: make the detailed post view intent
                 Intent i = new Intent(context, DetailActivity.class);
                 i.putExtra("post", post);
