@@ -70,12 +70,6 @@ public class HomeActivity extends AppCompatActivity {
         swipeContainer = findViewById(R.id.swipeContainer);
 
 
-
-        // instantiate the data source
-//        posts = new ArrayList<>();
-//        // construct the adapter
-
-
         PagedList.Config pagedListConfig =
                 new PagedList.Config.Builder().setEnablePlaceholders(true)
                         .setPrefetchDistance(10)

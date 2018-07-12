@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.parse.ParseException;
 
 
 import org.parceler.Parcels;
@@ -56,7 +57,11 @@ public class PostAdapter extends PagedListAdapter<Post, PostAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         Post post = getItem(i);
         viewHolder.tvBody.setText(post.getDescription());
-//        viewHolder.tvHandle.setText(post.getUser().get("handle").toString());
+        try {
+            viewHolder.tvHandle.setText(post.getUser().fetchIfNeeded().getString("handle"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         Glide.with(context).load(post.getImage().getUrl()).into(viewHolder.ivPostImage);
         String timestamp = getRelativeTimeAgo(post.getCreatedAt());
         viewHolder.tvTimestamp.setText(timestamp);

@@ -6,6 +6,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.parse.ParseException;
 
 import org.parceler.Parcels;
 import org.w3c.dom.Text;
@@ -31,7 +32,11 @@ public class DetailActivity extends AppCompatActivity {
 
         Glide.with(this).load(post.getImage().getUrl()).into(ivDetailPhoto);
         tvDetailBody.setText(post.getDescription());
-        tvDetailHandle.setText(post.getUser().get("handle").toString());
+        try {
+            tvDetailHandle.setText(post.getUser().fetchIfNeeded().getString("handle"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         tvDetailTimestamp.setText(post.getCreatedAt().toString());
     }
 
