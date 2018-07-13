@@ -2,10 +2,6 @@ package me.omarim.parstegram;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -31,7 +27,7 @@ import me.omarim.parstegram.models.Post;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CreateFragment.OnFragmentInteractionListener} interface
+ * {@link OnButtonPressListener} interface
  * to handle interaction events.
  * Use the {@link CreateFragment#create} factory method to
  * create an instance of this fragment.
@@ -47,7 +43,7 @@ public class CreateFragment extends Fragment {
     private static final String ARG_PHOTOPATH = "ARG_PHOTOPATH";
 
 
-    private OnFragmentInteractionListener mListener;
+    private OnButtonPressListener listener;
 
     public CreateFragment() {
         // Required empty public constructor
@@ -104,18 +100,18 @@ public class CreateFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnButtonPressListener) {
+            listener = (OnButtonPressListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnButtonPressListener");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        listener = null;
     }
 
     /**
@@ -128,7 +124,7 @@ public class CreateFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnButtonPressListener {
         void onButtonPressed();
     }
 
@@ -143,7 +139,7 @@ public class CreateFragment extends Fragment {
             public void done(ParseException e) {
                 if (e == null) {
                     Log.d("Home Activity", "Create Post Success!");
-                    mListener.onButtonPressed();
+                    listener.onButtonPressed();
                 }
                 else e.printStackTrace();
             }
@@ -151,8 +147,8 @@ public class CreateFragment extends Fragment {
     }
 
     public void onCreateButtonPressed() {
-        if (mListener != null) {
-            mListener.onButtonPressed();
+        if (listener != null) {
+            listener.onButtonPressed();
         }
     }
 

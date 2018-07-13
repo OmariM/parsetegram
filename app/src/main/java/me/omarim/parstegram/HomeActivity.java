@@ -186,7 +186,7 @@ public class HomeActivity extends AppCompatActivity implements TimelineFragment.
 
     @Override
     public void onRefresh() {
-        bottomNavigationView.setSelectedItemId(R.id.action_timeline);
+
     }
 
     @Override

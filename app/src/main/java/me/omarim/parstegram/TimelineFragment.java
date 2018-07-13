@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -30,7 +31,7 @@ import me.omarim.parstegram.models.Post;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link TimelineFragment.OnFragmentInteractionListener} interface
+ * {@link TimelineFragment.Callback} interface
  * to handle interaction events.
  * Use the {@link TimelineFragment} factory method to
  * create an instance of this fragment.
@@ -42,8 +43,9 @@ public class TimelineFragment extends Fragment {
     LiveData<PagedList<Post>> posts;
     RecyclerView rvPosts;
     private SwipeRefreshLayout swipeContainer;
+    int itemCount;
 
-    private OnFragmentInteractionListener mListener;
+    private Callback listener;
 
     public TimelineFragment() {
         // Required empty public constructor
@@ -67,7 +69,7 @@ public class TimelineFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         rvPosts = view.findViewById(R.id.rvPosts);
@@ -75,9 +77,9 @@ public class TimelineFragment extends Fragment {
 
         PagedList.Config pagedListConfig =
                 new PagedList.Config.Builder().setEnablePlaceholders(true)
-                        .setPrefetchDistance(10)
-                        .setInitialLoadSizeHint(10)
-                        .setPageSize(10).build();
+                        .setPrefetchDistance(2)
+                        .setInitialLoadSizeHint(2)
+                        .setPageSize(2).build();
 
         postAdapter = new PostAdapter(new DiffUtil.ItemCallback<Post>() {
             @Override
@@ -102,7 +104,6 @@ public class TimelineFragment extends Fragment {
                 postAdapter.submitList(posts);
             }
         });
-
         // populate the recycler view
         loadTopPosts();
         // recycler view set up (layout manager, use andapter)
@@ -113,9 +114,14 @@ public class TimelineFragment extends Fragment {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                // set the item count
+                itemCount = postAdapter.getItemCount();
+                listener.onRefresh();
                 loadTopPosts();
+
             }
         });
+
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
@@ -123,28 +129,21 @@ public class TimelineFragment extends Fragment {
                 android.R.color.holo_red_light);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof Callback) {
+            listener = (Callback) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnButtonPressListener");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        listener = null;
     }
 
     /**
@@ -157,20 +156,32 @@ public class TimelineFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public interface Callback {
+        void onRefresh();
     }
 
     private void loadTopPosts() {
+        postAdapter = new PostAdapter(new DiffUtil.ItemCallback<Post>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Post post, @NonNull Post t1) {
+                return post.getObjectId() == t1.getObjectId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Post post, @NonNull Post t1) {
+                return post.getUpdatedAt() == t1.getUpdatedAt();
+            }
+        }, this.getContext());
+
         final Post.Query postQuery = new Post.Query();
         postQuery.getTop().withUser().recentFirst();
         postQuery.findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    swipeContainer.setRefreshing(false);
                     postAdapter.notifyDataSetChanged();
+                    // stop refreshing
+                    swipeContainer.setRefreshing(false);
                 } else {
                     e.printStackTrace();
                 }
