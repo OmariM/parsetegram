@@ -1,13 +1,7 @@
 package me.omarim.parstegram;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,44 +10,23 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
-
-import org.json.JSONArray;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
-import java.util.concurrent.Executors;
 
-import me.omarim.parstegram.models.ParseDataSourceFactory;
-import me.omarim.parstegram.models.Post;
-
-public class HomeActivity extends AppCompatActivity implements TimelineFragment.OnFragmentInteractionListener, CreateFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener {
+public class HomeActivity extends AppCompatActivity implements TimelineFragment.Callback, CreateFragment.OnButtonPressListener, ProfileFragment.OnFragmentInteractionListener {
 
     public final static int FROM_CAMERA_REQUEST_CODE = 1;
     public final static int BACK_TO_TIMELINE = 2;
@@ -96,6 +69,11 @@ public class HomeActivity extends AppCompatActivity implements TimelineFragment.
                                 fragmentTransaction.replace(R.id.fragmentContainer, timelineFragment).commit();
                                 return true;
                             case R.id.action_camera:
+                                if ( Build.VERSION.SDK_INT >= 23 &&
+                                        ContextCompat.checkSelfPermission( HomeActivity.this, android.Manifest.permission.CAMERA ) != PackageManager.PERMISSION_GRANTED) {
+                                    Toast.makeText(HomeActivity.this, "Make sure you have permissions enabled!", Toast.LENGTH_SHORT).show();
+                                    return false;
+                                }
                                 dispatchTakePictureIntent();
                                 fragmentTransaction.replace(R.id.fragmentContainer, CreateFragment.create(mCurrentPhotoPath)).commit();
                                 return true;
@@ -207,8 +185,8 @@ public class HomeActivity extends AppCompatActivity implements TimelineFragment.
 
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onRefresh() {
+        bottomNavigationView.setSelectedItemId(R.id.action_timeline);
     }
 
     @Override
@@ -216,5 +194,6 @@ public class HomeActivity extends AppCompatActivity implements TimelineFragment.
         ParseUser.logOut();
         Intent i = new Intent(this, LoginActivity.class);
         startActivity(i);
+        finish();
     }
 }
