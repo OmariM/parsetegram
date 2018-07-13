@@ -6,6 +6,8 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +15,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -23,13 +29,16 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 
@@ -44,19 +53,21 @@ import java.util.concurrent.Executors;
 import me.omarim.parstegram.models.ParseDataSourceFactory;
 import me.omarim.parstegram.models.Post;
 
-public class HomeActivity extends AppCompatActivity {
-
-    Button btCreate;
-    Button btLogout;
+public class HomeActivity extends AppCompatActivity implements TimelineFragment.OnFragmentInteractionListener, CreateFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener {
 
     public final static int FROM_CAMERA_REQUEST_CODE = 1;
     public final static int BACK_TO_TIMELINE = 2;
     String mCurrentPhotoPath;
 
-    private PostAdapter postAdapter;
-    LiveData<PagedList<Post>> posts;
-    RecyclerView rvPosts;
-    private SwipeRefreshLayout swipeContainer;
+
+    FragmentTransaction fragmentTransaction;
+    BottomNavigationView bottomNavigationView;
+
+    Fragment timelineFragment = new TimelineFragment();
+    Fragment profileFragment = new ProfileFragment();
+
+    String APP_TAG = "PARSTEGRAM";
+    File photoFile;
 
 
 
@@ -64,98 +75,39 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        btCreate = findViewById(R.id.btCreate);
-        btLogout = findViewById(R.id.btLogout);
-        rvPosts = findViewById(R.id.rvPosts);
-        swipeContainer = findViewById(R.id.swipeContainer);
 
 
-        PagedList.Config pagedListConfig =
-                new PagedList.Config.Builder().setEnablePlaceholders(true)
-                        .setPrefetchDistance(10)
-                        .setInitialLoadSizeHint(10)
-                        .setPageSize(10).build();
+        final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        postAdapter = new PostAdapter(new DiffUtil.ItemCallback<Post>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Post post, @NonNull Post t1) {
-                return post.getObjectId() == t1.getObjectId();
-            }
+        fragmentTransaction = fragmentManager.beginTransaction();
 
-            @Override
-            public boolean areContentsTheSame(@NonNull Post post, @NonNull Post t1) {
-                return post.getUpdatedAt() == t1.getUpdatedAt();
-            }
-        }, this);
+        // handle navigation selection
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        fragmentTransaction.replace(R.id.fragmentContainer, timelineFragment).commit();
 
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        fragmentTransaction = fragmentManager.beginTransaction();
 
-        ParseDataSourceFactory sourceFactory = new ParseDataSourceFactory();
+                        switch (item.getItemId()) {
+                            case R.id.action_timeline:
+                                fragmentTransaction.replace(R.id.fragmentContainer, timelineFragment).commit();
+                                return true;
+                            case R.id.action_camera:
+                                dispatchTakePictureIntent();
+                                fragmentTransaction.replace(R.id.fragmentContainer, CreateFragment.create(mCurrentPhotoPath)).commit();
+                                return true;
+                            case R.id.action_profile:
+                                fragmentTransaction.replace(R.id.fragmentContainer, profileFragment).commit();
+                                return true;
+                        }
 
-        posts = new LivePagedListBuilder(sourceFactory, pagedListConfig).build();
+                        return false;
+                    }
+                });
 
-        posts.observe(this, new Observer<PagedList<Post>>() {
-            @Override
-            public void onChanged(@Nullable PagedList<Post> posts) {
-                postAdapter.submitList(posts);
-            }
-        });
-
-        // recycler view set up (layout manager, use andapter)
-        rvPosts.setLayoutManager(new LinearLayoutManager(this));
-        // set the adapter
-        rvPosts.setAdapter(postAdapter);
-        // populate the recycler view
-        loadTopPosts();
-
-        btCreate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                dispatchTakePictureIntent();
-
-            }
-        });
-
-        btLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ParseUser.logOut();
-                Intent i = new Intent(HomeActivity.this, LoginActivity.class);
-                startActivity(i);
-                finish();
-            }
-        });
-
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadTopPosts();
-            }
-        });
-        // Configure the refreshing colors
-        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-
-
-    }
-
-
-
-    private void loadTopPosts() {
-        final Post.Query postQuery = new Post.Query();
-        postQuery.getTop().withUser().recentFirst();
-        postQuery.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> objects, ParseException e) {
-                if (e == null) {
-                    swipeContainer.setRefreshing(false);
-                } else {
-                    e.printStackTrace();
-                }
-            }
-        });
 
     }
 
@@ -164,15 +116,44 @@ public class HomeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK && requestCode == FROM_CAMERA_REQUEST_CODE) {
-            Intent i = new Intent(this, CreateActivity.class);
-            i.putExtra("photoPath", mCurrentPhotoPath);
-            startActivity(i);
+//            Intent i = new Intent(this, CreateActivity.class);
+//            i.putExtra("photoPath", mCurrentPhotoPath);
+//            startActivity(i);
+
+            CreateFragment.create(mCurrentPhotoPath);
+
+
+        }
+//
+//        if (resultCode == RESULT_OK && requestCode == BACK_TO_TIMELINE) {
+//            Toast.makeText(this, "Back to time line received", Toast.LENGTH_LONG).show();
+////            postAdapter.clear();
+//            loadTopPosts();
+//        }
+    }
+
+    // Returns the File for a photo stored on disk given the fileName
+    public void onLaunchCamera() {
+        // create Intent to take a picture and return control to the calling application
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Create a File reference to access to future access
+        try {
+            photoFile = createImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        if (resultCode == RESULT_OK && requestCode == BACK_TO_TIMELINE) {
-            Toast.makeText(this, "Back to time line received", Toast.LENGTH_LONG).show();
-//            postAdapter.clear();
-            loadTopPosts();
+        // wrap File object into a content provider
+        // required for API >= 24
+        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
+        Uri fileProvider = FileProvider.getUriForFile(HomeActivity.this, "me.omarim.fileprovider", photoFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Start the image capture intent to take photo
+            startActivityForResult(intent, FROM_CAMERA_REQUEST_CODE);
         }
     }
 
@@ -219,5 +200,21 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onButtonPressed() {
+        bottomNavigationView.setSelectedItemId(R.id.action_timeline);
+    }
 
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onFragmentInteraction() {
+        ParseUser.logOut();
+        Intent i = new Intent(this, LoginActivity.class);
+        startActivity(i);
+    }
 }

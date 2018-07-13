@@ -45,7 +45,6 @@
                 android:resource="@xml/fileprovider" />
         </provider>
 
-        <activity android:name=".CreateActivity" />
         <activity android:name=".DetailActivity"></activity>
     </application>
 

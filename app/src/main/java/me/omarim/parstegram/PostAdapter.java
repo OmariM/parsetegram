@@ -30,18 +30,10 @@ public class PostAdapter extends PagedListAdapter<Post, PostAdapter.ViewHolder> 
 
     Context context;
 
-    // pass in the tweets array from the constructor
-//    public PostAdapter(List<Post> posts) {
-//        this.posts = posts;
-//    }
-
     public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, Context context) {
         super(diffCallback);
         this.context = context;
     }
-
-
-    // for each row inflate the layout and cache them into a viewholder
 
     @NonNull
     @Override
