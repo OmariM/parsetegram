@@ -9,6 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -53,5 +54,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
     // infinite pagination
     implementation "android.arch.paging:runtime:1.0.0"
+    // cardview
+    implementation 'com.android.support:cardview-v7:27.1.1'
 
 }

@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".LoginActivity"
+    android:background="@drawable/bg_splash"
+    android:theme="@style/AppTheme.Launcher">
 
     <EditText
         android:id="@+id/etUsername"
@@ -15,6 +17,7 @@
         android:layout_marginTop="120dp"
         android:ems="10"
         android:hint="username"
+        android:textColor="@color/white"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
@@ -30,8 +33,8 @@
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="password"
+        android:textColor="@color/white"
         android:inputType="textPassword"
-        android:password="true"
         app:layout_constraintBottom_toTopOf="@+id/etEmail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
@@ -76,6 +79,7 @@
         android:ems="10"
         android:hint="email"
         android:inputType="textEmailAddress"
+        android:textColor="@color/white"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
@@ -106,6 +110,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:textColor="@color/white"
         android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="handle"

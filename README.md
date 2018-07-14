@@ -2,7 +2,7 @@
 
 **Parstegram** is a photo sharing app using Parse as its backend.
 
-Time spent: **18** hours spent in total
+Time spent: **26** hours spent in total
 
 ## User Stories
 
@@ -18,11 +18,11 @@ The following **required** functionality is completed:
 
 The following **optional** features are implemented:
 
-- [ ] Style the login page to look like the real Instagram login page.
-- [ ] Style the feed to look like the real Instagram feed.
-- [ ] User should switch between different tabs - viewing all posts (feed view), capture (camera and photo gallery view) and profile tabs (posts made) using a Bottom Navigation View.
+- [x] Style the login page to look like the real Instagram login page.
+- [x] Style the feed to look like the real Instagram feed.
+- [x] User should switch between different tabs - viewing all posts (feed view), capture (camera and photo gallery view) and profile tabs (posts made) using a Bottom Navigation View.
 - [x] User can load more posts once he or she reaches the bottom of the feed using infinite scrolling.
-- [ ] Show the username and creation time for each post
+- [x] Show the username and creation time for each post
 - [ ] After the user submits a new post, show an indeterminate progress bar while the post is being uploaded to Parse
 - User Profiles:
    - [ ] Allow the logged in user to add a profile photo
@@ -41,8 +41,7 @@ The following **additional** features are implemented:
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
-1.
-2.
+1.Infinite Pagination
 
 ## Video Walkthrough
 
@@ -61,7 +60,7 @@ List an 3rd party libraries, icons, graphics, or other assets you used in your a
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+I spent 10 hours trying to debug refreshing after implementing infinite pagination so I think that was something that was not very good to implement.
 
 ## License
 
